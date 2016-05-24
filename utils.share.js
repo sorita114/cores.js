@@ -1,6 +1,6 @@
 ﻿/**
 * @name : utils.share.js
-* @depends: 
+* @depends:
 */
 (function(window) {
 
@@ -8,56 +8,90 @@
 
     utils.shareHandler = new function() {
         var config = {
-                isMobile: utils.isMobile(),                
-                title: getMeta('og:title'),
-                image: getMeta('og:image'),
-                url: getMeta('og:url')
+            isMobile: utils.isMobile(),
+            appkey: '054662e3e0bf58ab93b3fb1f8f94c78b',
+            title: getMeta('og:title'),
+            image: getMeta('og:image'),
+            url: getMeta('og:url'),
+            kakaotalk: {
+                id: 'kakao-link',
+                width: '300',
+                height: '200',
+                text: ''
+            }
+        },
+        services = {
+            facebook: function facebook(url) {
+                url = url || config.url;
+                var params = {u: setDomain(url)},
+                    path = 'http://facebook.com/sharer.php',
+                    openUrl = path + getParamString(params);
+
+                window.open(openUrl, 'share_facebook', 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=420,height=370');
             },
-            services = {
-                facebook: function facebook(url) {
-                    url = url || config.url;                    
-                    var params = {u: setDomain(url)},
-                        path = 'http://facebook.com/sharer.php',
-                        openUrl = path + getParamString(params);                    
-                    
-                    window.open(openUrl, 'share_facebook', 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=420,height=370');                    
-                },
-                twitter: function twitter(url, title) {
-                    url = url || config.url;
-                    title = title || getMeta('og:title');
+            twitter: function twitter(url, title) {
+                url = url || config.url;
+                title = title || getMeta('og:title');
 
-                    var popup = null,
-                        settngs = 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=640, height=440';
+                var popup = null,
+                    settngs = 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=640, height=440';
 
-                    if (popup == null) { popup = window.open('', 'share_twitter', settngs); }
+                if (popup == null) { popup = window.open('', 'share_twitter', settngs); }
 
-                    shortenUrl(setDomain(url), function(res) {
-                        var params = { text: title, url: res },
-                            path = 'https://twitter.com/intent/tweet',
-                            openUrl = path + '?' + $.param(params);                           
+                shortenUrl(setDomain(url), function(res) {
+                    var params = { text: title, url: res },
+                        path = 'https://twitter.com/intent/tweet',
+                        openUrl = path + '?' + $.param(params);
 
-                        popup.location.href = openUrl;                            
-                    });
-                },
-                googleplus : function googleplus(url) { 
-                	url = url || config.url;
-                	
-                	var params = { 
-            			url: setDomain(url),
-            			hl: 'ko'
-    				},
-    				path = 'https://plus.google.com/share',
-    				openUrl = path + '?' + $.param(params);
-                	
-                	var popup = null,
-                    	settngs = 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=500,height=370';
-                	
-                	if (popup == null) { popup = window.open('', 'share_google', settngs); }
-                	
-                	popup.location.href = openUrl;
-                }
-            };
-       
+                    popup.location.href = openUrl;
+                });
+            },
+            googleplus : function googleplus(url) {
+            	url = url || config.url;
+
+            	var params = {
+                    url: setDomain(url),
+                    hl: 'ko'
+              },
+              path = 'https://plus.google.com/share',
+              openUrl = path + '?' + $.param(params);
+
+            	var popup = null,
+                	settngs = 'directories=no,location=no,menubar=no,status=no,toolbar=no,scrollbars=no,resizable=no,width=500,height=370';
+
+            	if (popup == null) { popup = window.open('', 'share_google', settngs); }
+
+            	popup.location.href = openUrl;
+            },
+            kakaostory: function kakaostory(url, title) {
+                url = url || config.url;
+                title = title || config.title;
+                Kakao.Story.share({ url: setDomain(url) });
+            },
+            kakaotalk: function kakaotalk() {
+                Kakao.Link && Kakao.Link.sendTalkLink({
+                    label: config.title,
+                    image: {
+                        src: config.image || utils.config('imagePath') + '/mw/kakao_share.png',
+                        width: config.kakaotalk.width,
+                        height: config.kakaotalk.height
+                    },
+                    webLink: {
+                        text: setDomain(config.url),
+                        url: setDomain(config.url)
+                    },
+                    fail: function () {
+                        alert('지원하지 않는 플랫폼입니다.');
+                    }
+                });
+            }
+        };
+
+        (function init() {
+             if (window.Kakao && window.Kakao.Auth === undefined) {
+                 Kakao.init(config.appkey);
+             }
+         })();
 
         function getMeta(name) {
             var metaTag = $('meta'),
@@ -97,7 +131,7 @@
 //                    utils.api.addShortenUrl({device: 'mobile', id: productId, url: url});
 //                }
 //            });
-        	
+
         	callback && callback(url);
         }
 
@@ -112,7 +146,7 @@
                 url = $btn.data('url'),
                 title = $btn.data('title'),
                 func = services[service];
-            
+
             if(service === 'copyurl') {
             	$btn.copyUrl();
             } else {
