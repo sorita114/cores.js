@@ -2,7 +2,7 @@ let Cookie = ( superclass ) => class extends superclass {
   constructor () {
     super ();
     this.cookie = {
-      get ( skey ) {
+      get ( sKey ) {
         if( !sKey ) {
           return null;
         }
@@ -19,14 +19,11 @@ let Cookie = ( superclass ) => class extends superclass {
 
         return cookie;
       },
-      set ( sKey, sValue, vEnd, sPath, sDomain, bSecure ) {
+      set ( sKey, sValue, vEnd = 1, sPath = '/', sDomain, bSecure ) {
         if(!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
           return false;
         }
         let sExpires = "";
-
-        vEnd = vEnd === undefined ? 1 : vEnd;
-        sPath = sPath === undefined ? '/' : sPath;
 
         if(vEnd) {
           switch(vEnd.constructor) {
@@ -45,12 +42,10 @@ let Cookie = ( superclass ) => class extends superclass {
         document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
         return true;
       },
-      remove ( sKey, sPath, sDomain ) {
+      remove ( sKey, sPath = '/', sDomain ) {
         if(!this.has(sKey)) {
           return false;
         }
-        sPath = sPath === undefined ? '/' : sPath;
-
         document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
         return true;
       },

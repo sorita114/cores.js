@@ -16,7 +16,7 @@ var Cookie = function Cookie(superclass) {
       var _this = _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this));
 
       _this.cookie = {
-        get: function get(skey) {
+        get: function get(sKey) {
           if (!sKey) {
             return null;
           }
@@ -33,14 +33,16 @@ var Cookie = function Cookie(superclass) {
 
           return cookie;
         },
-        set: function set(sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+        set: function set(sKey, sValue) {
+          var vEnd = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
+          var sPath = arguments.length <= 3 || arguments[3] === undefined ? '/' : arguments[3];
+          var sDomain = arguments[4];
+          var bSecure = arguments[5];
+
           if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
             return false;
           }
           var sExpires = "";
-
-          vEnd = vEnd === undefined ? 1 : vEnd;
-          sPath = sPath === undefined ? '/' : sPath;
 
           if (vEnd) {
             switch (vEnd.constructor) {
@@ -59,12 +61,13 @@ var Cookie = function Cookie(superclass) {
           document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
           return true;
         },
-        remove: function remove(sKey, sPath, sDomain) {
+        remove: function remove(sKey) {
+          var sPath = arguments.length <= 1 || arguments[1] === undefined ? '/' : arguments[1];
+          var sDomain = arguments[2];
+
           if (!this.has(sKey)) {
             return false;
           }
-          sPath = sPath === undefined ? '/' : sPath;
-
           document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
           return true;
         },
